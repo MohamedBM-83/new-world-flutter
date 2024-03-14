@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'navbar.dart';
 
 void main() {
   runApp(const MainApp());
@@ -14,6 +15,7 @@ class MainApp extends StatelessWidget {
         body: Center(
           child: Text('Hello World!'),
         ),
+        bottomNavigationBar: NavigationExample(),
       ),
     );
   }
