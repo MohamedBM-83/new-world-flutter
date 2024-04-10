@@ -4,7 +4,7 @@ import 'package:newworld_flutter/shop.dart';
 import 'package:newworld_flutter/account.dart';
 
 class NavigationExample extends StatefulWidget {
-  const NavigationExample({Key? key}) : super(key: key);
+  const NavigationExample({super.key});
 
   @override
   State<NavigationExample> createState() => _NavigationExampleState();

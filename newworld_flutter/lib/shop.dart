@@ -5,11 +5,11 @@ void main() {
 }
 
 class ShopPage extends StatelessWidget {
-  const ShopPage({Key? key}) : super(key: key);
+  const ShopPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Compte',
       home: BasicPage(),
     );
@@ -17,32 +17,15 @@ class ShopPage extends StatelessWidget {
 }
 
 class BasicPage extends StatelessWidget {
+  const BasicPage({super.key});
+
   CircleAvatar myProfilePic(double radius) {
     return CircleAvatar(
       radius: radius,
-      backgroundImage: AssetImage('images/profile.jpg'),
+      backgroundImage: const AssetImage('images/profile.jpg'),
     );
   }
-
-  Widget sectionTitleText(String text) {
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-      ),
-    );
-  }
-
- 
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
