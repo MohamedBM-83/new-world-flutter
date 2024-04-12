@@ -41,7 +41,7 @@ class BasicPage extends StatelessWidget {
             image: const AssetImage('images/back.jpeg'),
             fit: BoxFit.fill,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.8), // Change the opacity value here
+              Colors.black.withOpacity(0.8), 
               BlendMode.dstATop,
             ),
           ),
