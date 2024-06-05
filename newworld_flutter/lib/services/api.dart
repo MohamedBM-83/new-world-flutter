@@ -22,5 +22,5 @@ class API {
   final String baseUrl = 'http://127.0.0.1:8000/api';
 
   /// L'URL de base pour accéder aux images sur TMDB, permettant de construire des URL d'images pour les films.
-  final String baseImageUrl = 'https://127.0.0.1/images/';
+  final String baseImageUrl = 'http://127.0.0.1:8000/images/';
 }

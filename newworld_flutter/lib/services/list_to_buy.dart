@@ -1,5 +1,4 @@
 // Importe shared_preferences pour le stockage persistant des données.
-import 'package:flutter/material.dart';
 import 'package:netflim/models/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

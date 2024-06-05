@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:netflim/services/favourites_product.dart';
-import 'package:netflim/widgets/movie_search_bar.dart';
+import 'package:netflim/widgets/product_search_bar.dart';
 
 import '../models/product.dart';
 import '../services/api_service.dart';
@@ -64,7 +64,7 @@ class ProductListScreenState extends State<ProductListScreen> {
       title = "Votre Recherche";
 
       // Appel de l'api pour la recherche de films par titre
-      products = await ApiService().searchForProducts(1, searchText);
+      products = await ApiService().searchForProducts(searchText);
     } else {
       title = "Nos Produits";
 
@@ -109,12 +109,12 @@ class ProductListScreenState extends State<ProductListScreen> {
                 )
               : const SizedBox.shrink(),
           widget.displaySearchBar == true
-              ? MovieSearchBar(onQueryChanged: (String search) async {
-                  if (search != null && search.isNotEmpty) {
+              ? ProductSearchBar(onQueryChanged: (String search) async {
+                  if (search.isNotEmpty) {
                     title = "Votre Recherche";
 
                     // Appel de l'api pour la recherche de films par titre
-                    products = await ApiService().searchForProducts(1, search);
+                    products = await ApiService().searchForProducts(search);
                   } else {
                     title = "Nos Produits";
 

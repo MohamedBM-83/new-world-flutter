@@ -1,7 +1,7 @@
 // Importe shared_preferences pour le stockage persistant des données.
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netflim/models/product.dart';
+import 'package:netflim/services/api_service.dart';
 
 /// Favourites utilise le modèle Singleton pour gérer les préférences.
 ///
@@ -41,12 +41,12 @@ class FavouritesProduct {
     final productId = product.id.toString();
 // L'identifiant du film est inconnu?
     if (!favourites.contains(productId)) {
-          print('Adding product ${product.id} to favourites');
-// Ajout du film à la liste
+  // Ajout du film à la liste
       favourites.add(productId);
+      // ApiService().addToCart(user, product);
 // Sauvegarde persistante via les préférences
       _prefs?.setStringList('FavouritesProduct', favourites);
-      print(_prefs?.getStringList('FavouritesProduct'));
+
     }
   }
 

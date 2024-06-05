@@ -24,13 +24,13 @@ class MovieActionsMenu extends StatelessWidget {
           // Bouton Coup de coeur
           IconButton(
             icon: Icon(
-              isAFavourite ? Icons.favorite : Icons.favorite_border,
+              isAFavourite ? Icons.shopping_bag : Icons.shopping_bag_outlined,
               color: UserPreferences().mainTextColor),
             onPressed: onFavoritePressed,
           ),
           // Bouton Ajouter à votre liste
           IconButton(
-            icon: Icon(Icons.playlist_add,
+            icon: Icon(Icons.list,
                 color: UserPreferences().mainTextColor),
             onPressed: onAddToListPressed,
           ),

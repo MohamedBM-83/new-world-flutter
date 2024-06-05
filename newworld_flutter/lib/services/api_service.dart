@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
-import '../models/movie.dart';
 import '../models/product.dart';
+import 'package:netflim/models/user.dart';
 import 'api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Classe `ApiService` gère les requêtes réseau pour récupérer des données de
 /// films depuis une API externe.
@@ -26,6 +27,8 @@ class ApiService {
   /// Retourne une réponse Dio si la requête aboutit avec un code de statut 200.
   /// Sinon, lève une exception contenant la réponse de la requête.
   Future<Response> getData(String path, {Map<String, dynamic>? params}) async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
     // Construction de l'URL complète
     String url = api.baseUrl + path;
 
@@ -33,6 +36,12 @@ class ApiService {
 
     // Lancement de la requète
     final response = await dio.get(url);
+    // final response = await dio.get(url, queryParameters: params, options: Options(
+    //   headers: { 
+    //     'Authorization': 'Bearer $token',
+    //     'Content-Type': 'application/json',
+    //     },
+    // ));
 
     if (response.statusCode == 200) {
       return response;
@@ -41,96 +50,26 @@ class ApiService {
     }
   }
 
-  /// Récupère une liste des films populaires à partir de l'API.
-  ///
-  /// [pageNumber] Le numéro de la page à récupérer pour la pagination des résultats.
-  ///
-  /// Retourne une liste d'objets `Movie` si la requête est réussie.
-  /// Sinon, lève une exception contenant la réponse de la requête.
-  Future<List<Movie>> getPopularMovies(int pageNumber) async {
-    Response response = await getData("/movie/popular", params: {
-      'page': pageNumber,
-    });
+  Future<bool> authenticate(String email, String password) async {
+    final response = await dio.post(
+      'http://localhost:8000/api/login_check',
+      options: Options(
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ),
+      data: {
+        'username': email,
+        'password': password,
+      },
+    );
 
     if (response.statusCode == 200) {
-      Map data = response.data;
-
-      List<dynamic> results = data["results"];
-      List<Movie> movies = [];
-
-      for (Map<String, dynamic> json in results) {
-        // Transformation du JSON en objet Movie
-        Movie movie = Movie(
-            id: json['id'] as int,
-            name: json['title'] as String,
-            description: json['overview'] as String,
-            posterPath: json['poster_path'] ?? '');
-
-        movies.add(movie);
-      }
-
-      return movies;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', response.data['token']);
+      return true;
     } else {
-      throw response;
-    }
-  }
-
-  /// Récupère une liste des films sur un criète de recherge à partir de l'API.
-  ///
-  /// [pageNumber] Le numéro de la page à récupérer pour la pagination des résultats.
-  ///
-  /// Retourne une liste d'objets `Movie` si la requête est réussie.
-  /// Sinon, lève une exception contenant la réponse de la requête.
-  Future<List<Movie>> searchForMovies(
-      int pageNumber, String searchString) async {
-    Response response = await getData("/search/movie",
-        params: {'page': pageNumber, 'query': searchString});
-
-    if (response.statusCode == 200) {
-      Map data = response.data;
-
-      List<dynamic> results = data["results"];
-      List<Movie> movies = [];
-
-      for (Map<String, dynamic> json in results) {
-        // Transformation du JSON en objet Movie
-        Movie movie = Movie(
-            id: json['id'] as int,
-            name: json['title'] as String,
-            description: json['overview'] as String,
-            posterPath: json['poster_path'] ?? '');
-
-        movies.add(movie);
-      }
-
-      return movies;
-    } else {
-      throw response;
-    }
-  }
-
-  /// Récupère le détail d'un film sur la base de son identifiant.
-  ///
-  /// Retourne un objet `Movie` si la requête est réussie.
-  /// Sinon, lève une exception contenant la réponse de la requête.
-  Future<Movie?> getMovie(int movieId) async {
-    Response response = await getData("/movie/$movieId");
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> json = response.data;
-
-      print(json.toString());
-
-      // Transformation du JSON en objet Movie
-      Movie movie = Movie(
-          id: json['id'] as int,
-          name: json['title'] as String,
-          description: json['overview'] as String,
-          posterPath: json['poster_path'] ?? '');
-
-      return movie;
-    } else {
-      throw response;
+      return false;
     }
   }
 
@@ -174,8 +113,6 @@ class ApiService {
     if (response.statusCode == 200) {
       Map<String, dynamic> json = response.data;
 
-      print(json.toString());
-
       // Transformation du JSON en objet Movie
       Product product = Product(
           id: json['id'] as int,
@@ -184,7 +121,7 @@ class ApiService {
           price: json['price'] as double,
           partner: json['partner'] as String,
           quantity: json['quantity'] as String,
-          image: json['image']);
+          image: json['image'] as String);
 
       return product;
     } else {
@@ -192,10 +129,8 @@ class ApiService {
     }
   }
 
-  Future<List<Product>> searchForProducts(
-      int pageNumber, String searchString) async {
-    Response response = await getData("/search/products",
-        params: {'page': pageNumber, 'query': searchString});
+  Future<List<Product>> searchForProducts(String searchString) async {
+    Response response = await getData("/products?name=$searchString");
 
     if (response.statusCode == 200) {
       Map data = response.data;
@@ -204,7 +139,7 @@ class ApiService {
       List<Product> products = [];
 
       for (Map<String, dynamic> json in results) {
-        // Transformation du JSON en objet Movie
+        // Transformation du JSON en objet Product
         Product product = Product(
             id: json['id'] as int,
             name: json['name'] as String,
@@ -212,7 +147,7 @@ class ApiService {
             price: json['price'] as double,
             partner: json['partner'] as String,
             quantity: json['quantity'] as String,
-            image: json['image']);
+            image: json['image'] as String);
 
         products.add(product);
       }
@@ -223,4 +158,24 @@ class ApiService {
     }
   }
 
+   Future<User> getUser(String email, String password) async {
+    Response response = await getData("/users", params: {
+      'email': email,
+      'password': password,
+    });
+if (response.statusCode == 200) {
+      Map<String, dynamic> json = response.data;
+
+      // Transformation du JSON en objet Movie
+      User user = User(
+          id: json['id'] as int,
+          email: json['email'] as String,
+          firstname: json['firstname'] as String,
+          lastname: json['lastname'] as String);
+
+      return user;
+    } else {
+      throw response;
+    }
+  } 
 }

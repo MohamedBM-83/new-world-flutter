@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:netflim/models/app_tab_controller.dart';
-import 'package:netflim/screens/youtube_video_screen.dart';
 import 'package:netflim/services/favourites_product.dart';
 import 'package:netflim/services/list_to_buy.dart';
 import 'package:netflim/services/netflim_theme.dart';
 
-import 'screens/movie_list_screen.dart';
 
 import 'services/api_service.dart';
 import 'services/user_preferences.dart';
@@ -13,6 +11,7 @@ import 'services/user_preferences.dart';
 import 'models/product.dart';
 
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,7 +68,7 @@ class _MainAppState extends State<MainApp> {
 
     switch (_loadingStatus) {
       case LoadingStatus.success:
-        screen = AppTabController(ProductList: _products!);
+        screen = LoginScreen(products: _products!);
         break;
       default:
         screen = HomeScreen(
