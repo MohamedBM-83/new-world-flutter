@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:netflim/services/api_service.dart';
-import 'package:netflim/services/favourites_product.dart';
-// import 'package:netflim/services/list_to_watch.dart';
+import 'package:newworld/services/api_service.dart';
+import 'package:newworld/services/cart.dart';
+// import 'package:newworld/services/list_to_watch.dart';
 import '../models/product.dart';
 import '../screens/product_list_screen.dart';
 import '../services/user_preferences.dart';
-import 'package:netflim/services/list_to_buy.dart';
+import 'package:newworld/services/list_to_buy.dart';
 
 // import '../services/favourites.dart';
 
@@ -51,66 +51,73 @@ class _AppTabControllerState extends State<AppTabController>
   }
 
   // Construction du contexte
-    @override
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Center(child: Text('New World')),
-        backgroundColor: UserPreferences().newworldColord,
-        foregroundColor: UserPreferences().mainTextColor,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.home), text: 'Accueil'),
-            Tab(icon: Icon(Icons.shopping_bag), text: 'Panier'),
-            Tab(icon: Icon(Icons.person), text: 'Mon Compte'),
-          ],
-          labelStyle: const TextStyle(fontSize: 12),
-          unselectedLabelStyle: const TextStyle(fontSize: 10),
+    return WillPopScope(
+      onWillPop: () async => false, // Ignore l'action de retour
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Center(child: Text('New World')),
+          backgroundColor: UserPreferences().newworldColord,
+          foregroundColor: UserPreferences().mainTextColor,
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.home), text: 'Accueil'),
+              Tab(icon: Icon(Icons.shopping_bag), text: 'Panier'),
+              Tab(icon: Icon(Icons.person), text: 'Mon Compte'),
+            ],
+            labelStyle: const TextStyle(fontSize: 12),
+            unselectedLabelStyle: const TextStyle(fontSize: 10),
+          ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          Container(
-            color: UserPreferences().backgroundColor,
-            child: Center(
-              child: ProductListScreen(title: "Nos Produits", products: widget._productList!),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            Container(
+              color: UserPreferences().backgroundColor,
+              child: Center(
+                child: ProductListScreen(
+                    title: "Nos Produits", products: widget._productList!),
+              ),
             ),
-          ),
-          FutureBuilder<List<Product>?>(
-            future: _productsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                    color: UserPreferences().backgroundColor,
-                    child: Center(
-                        child: CircularProgressIndicator(
-                            color: UserPreferences().newworldColord)));
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Erreur: ${snapshot.error}'));
-              } else {
-                return ProductListScreen(title: "Nos Produits",products: snapshot.data ?? []);
-              }
-            },
-          ),
-          FutureBuilder<List<Product>?>(
-            future: _productsFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                    color: UserPreferences().backgroundColor,
-                    child: Center(
-                        child: CircularProgressIndicator(
-                            color: UserPreferences().newworldColord)));
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Erreur: ${snapshot.error}'));
-              } else {
-                return ProductListScreen(title: "Nos Produits", products: snapshot.data ?? []);
-              }
-            },
-          ),
-        ],
+            FutureBuilder<List<Product>?>(
+              future: _productsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                      color: UserPreferences().backgroundColor,
+                      child: Center(
+                          child: CircularProgressIndicator(
+                              color: UserPreferences().newworldColord)));
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Erreur: ${snapshot.error}'));
+                } else {
+                  return ProductListScreen(
+                      title: "Votre Panier", products: snapshot.data ?? []);
+                }
+              },
+            ),
+            FutureBuilder<List<Product>?>(
+              future: _productsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                      color: UserPreferences().backgroundColor,
+                      child: Center(
+                          child: CircularProgressIndicator(
+                              color: UserPreferences().newworldColord)));
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Erreur: ${snapshot.error}'));
+                } else {
+                  return ProductListScreen(
+                      title: "Votre Compte", products: snapshot.data ?? []);
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -121,13 +128,14 @@ class _AppTabControllerState extends State<AppTabController>
 // Favoris
       case 1:
         // Récupérer la liste des identifiants
-        List<String> productIds = FavouritesProduct().list();
+        List<String> productIds = Cart().list();
 // Créer une liste vide pour stocker les produits
         List<Product> products = [];
 // Boucler sur chaque identifiant pour récupérer les produits correspondants
         for (String productId in productIds) {
 // Appeler l'API pour chaque produit et attendre le résultat
-          Product? product = await ApiService().getProduct(int.parse(productId));
+          Product? product =
+              await ApiService().getProduct(int.parse(productId));
 // Ajouter le produits à la liste des produitss
           if (product != null) products.add(product);
         }
@@ -142,7 +150,8 @@ class _AppTabControllerState extends State<AppTabController>
 // Boucler sur chaque identifiant pour récupérer les produits correspondants
         for (String productId in productIds) {
 // Appeler l'API pour chaque produits et attendre le résultat
-          Product? product = await ApiService().getProduct(int.parse(productId));
+          Product? product =
+              await ApiService().getProduct(int.parse(productId));
 // Ajouter le produit à la liste des produits
           if (product != null) products.add(product);
         }

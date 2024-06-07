@@ -1,5 +1,5 @@
 // Importe shared_preferences pour le stockage persistant des données.
-import 'package:netflim/models/product.dart';
+import 'package:newworld/models/product.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// ListToBuy utilise le modèle Singleton pour gérer les préférences.
@@ -25,18 +25,18 @@ class ListToBuy {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  /// Récupère la liste des films favoris
+  /// Récupère la liste des produits favoris
   addToList(Product product) async {
     // Récupération de la liste des favoris depuis les SharedPreferences.
     // Si aucune liste n'est stockée, on initialise une liste vide par défaut.
     List<String> ListToBuy = _prefs?.getStringList('l') ?? [];
     
-    // On utilise l'id du film comme clé dans le tableau
+    // On utilise l'id du produit comme clé dans le tableau
     final productId = product.id.toString();
     
-    // L'identifiant du film est inconnu?
+    // L'identifiant du produit est inconnu?
     if (!ListToBuy.contains(productId)) {
-      // Ajout du film à la liste
+      // Ajout du produit à la liste
         ListToBuy.add(productId);
       
       // Sauvegarde persistante via les préférences
@@ -44,18 +44,18 @@ class ListToBuy {
     }
   }
 
-  /// Supprime un film des favoris
+  /// Supprime un produit des favoris
   removeFromList(Product product) async {
     // Récupération de la liste des favoris depuis les SharedPreferences.
     // Si aucune liste n'est stockée, on initialise une liste vide par défaut.
     List<String> ListToBuy = _prefs?.getStringList('ListToBuy') ?? [];
     
-    // Conversion de l'ID du film en chaîne de caractères.
+    // Conversion de l'ID du produit en chaîne de caractères.
     final productId = product.id.toString();
     
-    // L'identifiant du film est connu?
+    // L'identifiant du produit est connu?
     if (ListToBuy.contains(productId)) {
-      // Suppression du film de la liste
+      // Suppression du produit de la liste
         ListToBuy.remove(productId);
       
       // Sauvegarde persistante via les préférences
@@ -63,27 +63,27 @@ class ListToBuy {
     }
   }
 
-  /// Vérifie si un film est dans les favoris
+  /// Vérifie si un produit est dans les favoris
   bool isInList(Product product) {
     // Récupération de la liste des favoris depuis les SharedPreferences.
     // Si aucune liste n'est stockée, on initialise une liste vide par défaut.
     List<String> ListToBuy = _prefs?.getStringList('ListToBuy') ?? [];
     
-    // Conversion de l'ID du film en chaîne de caractères.
+    // Conversion de l'ID du produit en chaîne de caractères.
     final movieId = product.id.toString();
     
-    // Vérifie si l'identifiant du film est présent dans la liste des favoris.
+    // Vérifie si l'identifiant du produit est présent dans la liste des favoris.
     // Retourne true si l'identifiant est trouvé, sinon false.
     return ListToBuy.contains(movieId);
   }
 
-  /// Récupère la liste des films à regarder
+  /// Récupère la liste des produits à regarder
   List<String> list() {
     // Récupération de la liste des favoris depuis les SharedPreferences.
     // Si aucune liste n'est stockée, on initialise une liste vide par défaut.
     List<String> ListToBuy = _prefs?.getStringList('ListToBuy') ?? [];
     
-    // Conversion de la liste d'identifiants en liste de films
+    // Conversion de la liste d'identifiants en liste de produits
     return ListToBuy;
   }
 }

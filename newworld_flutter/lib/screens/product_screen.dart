@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:netflim/services/favourites_product.dart';
-import 'package:netflim/services/list_to_buy.dart';
-import 'package:netflim/widgets/text_to_speech_button.dart';
+import 'package:newworld/services/cart.dart';
+import 'package:newworld/services/list_to_buy.dart';
+import 'package:newworld/widgets/text_to_speech_button.dart';
 
 import '../models/product.dart';
 
@@ -12,15 +12,17 @@ class ProductScreen extends StatefulWidget {
   final Product product;
   final VoidCallback onGoBack; // Méthode callback
 
-  const ProductScreen({super.key, required this.product, required this.onGoBack});
+  const ProductScreen(
+      {super.key, required this.product, required this.onGoBack});
 
   @override
   ProductScreenState createState() => ProductScreenState();
 }
 
-/// Widget ProductScreen qui affiche les détails d'un film
+/// Widget ProductScreen qui affiche les détails d'un produit
 class ProductScreenState extends State<ProductScreen> {
   late Product product;
+  int quantity = 1;
 
   @override
   void initState() {
@@ -42,7 +44,7 @@ class ProductScreenState extends State<ProductScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             const SizedBox(height: 8),
-            // Affiche du produit
+            // Image du produit
             FadeInImage.assetNetwork(
                 placeholder: 'assets/images/placeholder.png',
                 image: product.posterURL()!,
@@ -96,6 +98,30 @@ class ProductScreenState extends State<ProductScreen> {
                         .bodyMedium
                         ?.copyWith(color: UserPreferences().mainTextColor),
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        onPressed: () {
+                          setState(() {
+                            if (quantity > 1) {
+                              quantity--;
+                            }
+                          });
+                        },
+                      ),
+                      Text('$quantity'),
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            quantity++;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -104,10 +130,10 @@ class ProductScreenState extends State<ProductScreen> {
       ),
       bottomNavigationBar: MovieActionsMenu(
         onFavoritePressed: () {
-          if (FavouritesProduct().isAFavourite(product)) {
-            FavouritesProduct().removeFromFavourites(product);
+          if (Cart().isInCart(product)) {
+            Cart().removeFromCart(product);
           } else {
-            FavouritesProduct().addToFavourites(product);
+            Cart().addToCart(product);
           }
 
           setState(() {});
@@ -115,14 +141,14 @@ class ProductScreenState extends State<ProductScreen> {
           widget.onGoBack();
         },
         onAddToListPressed: () {
-          // Logique pour ajouter le film à la liste
+          // Logique pour ajouter le produit à la liste
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
                 title: const Text('Confirmer l\'ajout'),
                 content: const Text(
-                    'Voulez-vous ajouter ce film à votre liste à regarder ?'),
+                    'Voulez-vous ajouter ce produit à votre liste de souhait ?'),
                 actions: <Widget>[
                   TextButton(
                     // Ferme la boîte de dialogue sans rien faire
@@ -135,31 +161,28 @@ class ProductScreenState extends State<ProductScreen> {
                     onPressed: () {
                       // Ferme la boîte de dialogue
                       Navigator.of(context).pop();
-                      
+
                       if (ListToBuy().isInList(product)) {
                         showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Ajout impossible'),
-                              content: const Text(
-                                  'Le film est déjà présent dans votre liste à regarder'),
-                              actions: <Widget>[
-                                TextButton(
-                                  // Ferme la boîte de dialogue sans rien faire
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Ok'),
-                                ),
-                              ]
-                            );
-                          }
-                        );
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                  title: const Text('Ajout impossible'),
+                                  content: const Text(
+                                      'Le produit est déjà présent dans votre liste de souhait.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      // Ferme la boîte de dialogue sans rien faire
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('Ok'),
+                                    ),
+                                  ]);
+                            });
                       } else {
-                        // Logique pour ajouter le film à la liste
+                        // Logique pour ajouter le produit à la liste
                         ListToBuy().addToList(product);
-                        print('Ajouté à la liste');
                       }
                     },
                     child: const Text('Confirmer'),
@@ -169,7 +192,7 @@ class ProductScreenState extends State<ProductScreen> {
             },
           );
         },
-        isAFavourite: FavouritesProduct().isAFavourite(product),
+        isInCart: Cart().isInCart(product),
       ),
     );
   }

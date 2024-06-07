@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
 import 'home_screen.dart';
-import 'package:netflim/main.dart';
+import 'package:newworld/main.dart';
 import '../models/app_tab_controller.dart';
 import '../models/product.dart';
 
@@ -42,14 +42,11 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: ()   async {
-                print(_emailController.text);
-                print(_passwordController.text);
                 bool isAuthenticated = await ApiService().authenticate(
                   _emailController.text,
                   _passwordController.text,
                 );
                 if (isAuthenticated) {
-                  print("Bienjoué");
                   Navigator.push(context, MaterialPageRoute(builder: (context) => AppTabController(ProductList: products)));
                 // } else {
                 //   showDialog(

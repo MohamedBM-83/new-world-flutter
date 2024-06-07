@@ -1,7 +1,7 @@
 // Importe shared_preferences pour le stockage persistant des données.
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:netflim/models/product.dart';
-import 'package:netflim/services/api_service.dart';
+import 'package:newworld/models/product.dart';
+import 'package:newworld/services/api_service.dart';
 
 /// Favourites utilise le modèle Singleton pour gérer les préférences.
 ///

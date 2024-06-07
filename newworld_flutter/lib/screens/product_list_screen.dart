@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:netflim/services/favourites_product.dart';
-import 'package:netflim/widgets/product_search_bar.dart';
+import 'package:newworld/services/cart.dart';
+import 'package:newworld/widgets/product_search_bar.dart';
+import 'package:newworld/widgets/checkout_bar.dart';
 
 import '../models/product.dart';
 import '../services/api_service.dart';
@@ -10,13 +11,12 @@ import 'product_screen.dart';
 class ProductListScreen extends StatefulWidget {
   final String title;
   final List<Product> products;
-  final bool displaySearchBar;
 
-  const ProductListScreen(
-      {super.key,
-      required this.products,
-      required this.title,
-      this.displaySearchBar = true});
+  const ProductListScreen({
+    super.key,
+    required this.products,
+    required this.title,
+  });
 
   @override
   ProductListScreenState createState() => ProductListScreenState();
@@ -25,63 +25,28 @@ class ProductListScreen extends StatefulWidget {
 class ProductListScreenState extends State<ProductListScreen> {
   late String title;
   late List<Product> products;
+  bool displaySearchBar = false;
+  bool displaycheckoutBar = false;
 
   @override
   void initState() {
     super.initState();
     products = widget.products;
     title = widget.title;
-  }
-
-  void showSearchDialog(BuildContext context) async {
-    final searchText = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Recherche'),
-          content: TextField(
-            autofocus: true,
-            decoration: const InputDecoration(
-                hintText: 'Entrez un texte de recherche...'),
-            onSubmitted: (value) {
-              Navigator.of(context).pop(value);
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                // Close the dialog without returning text
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (searchText != null && searchText.isNotEmpty) {
-      title = "Votre Recherche";
-
-      // Appel de l'api pour la recherche de films par titre
-      products = await ApiService().searchForProducts(searchText);
-    } else {
-      title = "Nos Produits";
-
-      // Appel de l'api pour la recherche des films populaires
-      products = await ApiService().getProducts(1);
+    if (widget.title == "Nos Produits") {
+      displaySearchBar = true;
     }
-
-    // Mise à jour de l'UI
-    setState(() {});
+    if (widget.title == "Votre Panier") {
+      displaycheckoutBar = true;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: UserPreferences().backgroundColor,
-      /*appBar: AppBar(
-        title: const Text('NetFlim'),
+        backgroundColor: UserPreferences().backgroundColor,
+        /*appBar: AppBar(
+        title: const Text('newworld'),
         backgroundColor: UserPreferences().newworldColord,
         foregroundColor: UserPreferences().mainTextColor,
         actions: <Widget>[
@@ -94,105 +59,104 @@ class ProductListScreenState extends State<ProductListScreen> {
           ),
         ],
       ),*/
-      body: Column(
-        children: [
-          title != null
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: UserPreferences().mainTextColor,
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-          widget.displaySearchBar == true
-              ? ProductSearchBar(onQueryChanged: (String search) async {
-                  if (search.isNotEmpty) {
-                    title = "Votre Recherche";
-
-                    // Appel de l'api pour la recherche de films par titre
-                    products = await ApiService().searchForProducts(search);
-                  } else {
-                    title = "Nos Produits";
-
-                    // Appel de l'api pour la recherche des films populaires
-                    products = await ApiService().getProducts(1);
-                  }
-
-                  // Mise à jour de l'UI
-                  setState(() {});
-                })
-              : const SizedBox.shrink(),
-          Expanded(
-            child: ListView.builder(
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return ListTile(
-                  leading: FadeInImage.assetNetwork(
-                      placeholder: 'assets/images/placeholder.png',
-                      image: product.posterURL()!,
-                      width: 50,
-                      height: 100,
-                      fit: BoxFit.cover,
-                      imageErrorBuilder: (context, error, stackTrace) {
-                        // Widget de remplacement en cas d'erreur
-                        return Image.asset(
-                          'assets/images/placeholder.png',
-                          height: 300,
-                          fit: BoxFit.fitHeight,
-                        );
-                      }),
-                  title: Text(
-                    product.name,
-                    style: TextStyle(color: UserPreferences().mainTextColor),
-                  ),
-                  subtitle: Text(
-                    'Plus de détails...',
-                    style:
-                        TextStyle(color: UserPreferences().secondaryTextColor),
-                  ),
-                  onTap: () {
-                    // Navigue vers le MovieScreen avec les détails du film
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProductScreen(
-                          product: product,
-                          onGoBack: () => setState(() {}),
-                        ),
+        body: Column(
+          children: [
+            title != null
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: UserPreferences().mainTextColor,
                       ),
-                    );
-                  },
-                  trailing: IconButton(
-                    icon: Icon(
-                      FavouritesProduct().isAFavourite(product)
-                          ? Icons.shopping_bag
-                          : Icons.shopping_bag_outlined,
-                      color: Colors.green,
                     ),
-                    onPressed: () {
-                      if (FavouritesProduct().isAFavourite(product)) {
-                        // Si le film est déjà un favori, le retirer
-                        FavouritesProduct().removeFromFavourites(product);
-                      } else {
-                        // Sinon, ajouter le film aux favoris
-                        FavouritesProduct().addToFavourites(product);
-                        print("test");
-                      }
+                  )
+                : const SizedBox.shrink(),
+            displaySearchBar == true
+                ? ProductSearchBar(onQueryChanged: (String search) async {
+                    if (search.isNotEmpty) {
+                      title = "Votre Recherche";
 
-                      setState(() {});
+                      // Appel de l'api pour la recherche de produits par titre
+                      products = await ApiService().searchForProducts(search);
+                    } else {
+                      title = "Nos Produits";
+
+                      // Appel de l'api pour la recherche des produits
+                      products = await ApiService().getProducts(1);
+                    }
+
+                    // Mise à jour de l'UI
+                    setState(() {});
+                  })
+                : const SizedBox.shrink(),
+            Expanded(
+              child: ListView.builder(
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  final product = products[index];
+                  return ListTile(
+                    leading: FadeInImage.assetNetwork(
+                        placeholder: 'assets/images/placeholder.png',
+                        image: product.posterURL()!,
+                        width: 50,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        imageErrorBuilder: (context, error, stackTrace) {
+                          // Widget de remplacement en cas d'erreur
+                          return Image.asset(
+                            'assets/images/placeholder.png',
+                            height: 300,
+                            fit: BoxFit.fitHeight,
+                          );
+                        }),
+                    title: Text(
+                      product.name,
+                      style: TextStyle(color: UserPreferences().mainTextColor),
+                    ),
+                    subtitle: Text(
+                      'Plus de détails...',
+                      style: TextStyle(
+                          color: UserPreferences().secondaryTextColor),
+                    ),
+                    onTap: () {
+                      // Navigue vers le ProductScreen avec les détails du produit
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProductScreen(
+                            product: product,
+                            onGoBack: () => setState(() {}),
+                          ),
+                        ),
+                      );
                     },
-                  ),
-                );
-              },
+                    trailing: IconButton(
+                      icon: Icon(
+                        Cart().isInCart(product)
+                            ? Icons.shopping_bag
+                            : Icons.shopping_bag_outlined,
+                        color: Colors.green,
+                      ),
+                      onPressed: () {
+                        if (Cart().isInCart(product)) {
+                          // Si le produit est déjà un favori, le retirer
+                          Cart().removeFromCart(product);
+                        } else {
+                          // Sinon, ajouter le produit aux favoris
+                          Cart().addToCart(product);
+                        }
+
+                        setState(() {});
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+        bottomNavigationBar: displaycheckoutBar ? CheckoutBar() : null);
   }
 }

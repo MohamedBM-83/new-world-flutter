@@ -35,20 +35,20 @@ class UserPreferences {
     _prefs?.setString('username', value!);
   }
 
-  /// Getter pour 'netflim_color'. Retourne la valeur ou null si non défini.
+  /// Getter pour 'newworld_color'. Retourne la valeur ou null si non défini.
   Color get newworldColord {
     // Récupération de la valeur
-    int? aColorStr = _prefs?.getInt('netflim_color');
+    int? aColorStr = _prefs?.getInt('newworld_color');
 
-    // Si valeur nulle par défaut on utilise le rouge Netflim
+    // Si valeur nulle par défaut on utilise le rouge newworld
     aColorStr = aColorStr ?? Colors.green.value;
 
     return Color(aColorStr);
   }
 
-  /// Setter pour 'netflim_color'. Enregistre la valeur dans SharedPreferences.
+  /// Setter pour 'newworld_color'. Enregistre la valeur dans SharedPreferences.
   set newworldColord(Color value) {
-    _prefs?.setInt('netflim_color', value.value);
+    _prefs?.setInt('newworld_color', value.value);
   }
 
   /// Getter pour 'background_color'. Retourne la valeur ou null si non défini.
@@ -56,7 +56,7 @@ class UserPreferences {
     // Récupération de la valeur
     int? aColorStr = _prefs?.getInt('background_color');
 
-    // Si valeur nulle par défaut on utilise le rouge Netflim
+    // Si valeur nulle par défaut on utilise le rouge newworld
     aColorStr = aColorStr ?? Colors.white.value;
 
     return Color(aColorStr);
@@ -72,7 +72,7 @@ class UserPreferences {
     // Récupération de la valeur
     int? aColorStr = _prefs?.getInt('main_text_color');
 
-    // Si valeur nulle par défaut on utilise le rouge Netflim
+    // Si valeur nulle par défaut on utilise le rouge newworld
     aColorStr = aColorStr ?? Colors.black.value;
 
     return Color(aColorStr);
@@ -88,7 +88,7 @@ class UserPreferences {
     // Récupération de la valeur
     int? aColorStr = _prefs?.getInt('secondary_text_color');
 
-    // Si valeur nulle par défaut on utilise le rouge Netflim
+    // Si valeur nulle par défaut on utilise le rouge newworld
     aColorStr = aColorStr ?? Colors.grey.value;
 
     return Color(aColorStr);

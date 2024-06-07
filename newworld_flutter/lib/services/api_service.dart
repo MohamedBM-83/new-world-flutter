@@ -1,15 +1,16 @@
 import 'package:dio/dio.dart';
+import 'package:newworld/services/user_preferences.dart';
 import '../models/product.dart';
-import 'package:netflim/models/user.dart';
+import 'package:newworld/models/user.dart';
 import 'api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Classe `ApiService` gère les requêtes réseau pour récupérer des données de
-/// films depuis une API externe.
+/// produits depuis une API externe.
 ///
 /// Cette classe utilise la bibliothèque Dio pour effectuer des requêtes HTTP.
-/// Elle est conçue pour interroger une API spécifique de films et récupérer des
-/// informations telles que les films populaires.
+/// Elle est conçue pour interroger une API spécifique de produits et récupérer des
+/// informations telles que les produits populaires.
 ///
 /// Usage :
 /// Pour utiliser `ApiService`, créez une instance de la classe, puis invoquez
@@ -27,8 +28,8 @@ class ApiService {
   /// Retourne une réponse Dio si la requête aboutit avec un code de statut 200.
   /// Sinon, lève une exception contenant la réponse de la requête.
   Future<Response> getData(String path, {Map<String, dynamic>? params}) async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
     // Construction de l'URL complète
     String url = api.baseUrl + path;
 
@@ -37,7 +38,7 @@ class ApiService {
     // Lancement de la requète
     final response = await dio.get(url);
     // final response = await dio.get(url, queryParameters: params, options: Options(
-    //   headers: { 
+    //   headers: {
     //     'Authorization': 'Bearer $token',
     //     'Content-Type': 'application/json',
     //     },
@@ -65,13 +66,21 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', response.data['token']);
-      return true;
-    } else {
-      return false;
+
+      final response2 = await dio.get('http://localhost:8000/api/users?email=$email');
+      if (response2.statusCode == 200) {
+        List<dynamic> results = response2.data["hydra:member"];
+        int userId = results[0]['id'];
+        await prefs.setInt('userId', userId);
+      }
+        return true;
+      } else {
+        return false;
+      }
     }
-  }
 
   Future<List<Product>> getProducts(int pageNumber) async {
     Response response = await getData("/products", params: {
@@ -157,25 +166,32 @@ class ApiService {
       throw response;
     }
   }
+  Future<Response> createOrder(List<Map<String, dynamic>> cartItems) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int? userId = prefs.getInt('userId');
 
-   Future<User> getUser(String email, String password) async {
-    Response response = await getData("/users", params: {
-      'email': email,
-      'password': password,
-    });
-if (response.statusCode == 200) {
-      Map<String, dynamic> json = response.data;
+  // Construction du corps de la requête
+  Map<String, dynamic> body = {
+    'user': userId, // Assurez-vous que l'API attend le token ici, sinon vous devrez peut-être fournir l'ID de l'utilisateur
+    'status': 'pending', // Mettez le statut que vous voulez pour la nouvelle commande
+    'orderlines': cartItems.map((item) => {
+      'product_id': item['id'], // Assurez-vous que 'id' est le bon champ pour l'ID du produit
+      'quantity': item['quantity'], // Assurez-vous que 'quantity' est le bon champ pour la quantité
+    }).toList(),
+  };
 
-      // Transformation du JSON en objet Movie
-      User user = User(
-          id: json['id'] as int,
-          email: json['email'] as String,
-          firstname: json['firstname'] as String,
-          lastname: json['lastname'] as String);
+  // Envoi de la requête
+  final response = await dio.post(
+    '/orders',
+    data: body
+    );
 
-      return user;
-    } else {
-      throw response;
-    }
-  } 
+  // Vérification de la réponse
+  if (response.statusCode == 200) {
+    return response;
+  } else {
+    throw Exception('Failed to create order: ${response.statusMessage}');
+  }
+}
+  
 }

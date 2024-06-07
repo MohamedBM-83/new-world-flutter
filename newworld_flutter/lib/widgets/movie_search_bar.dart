@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:netflim/services/user_preferences.dart';
+import 'package:newworld/services/user_preferences.dart';
 
 /// Barre de recherche customisée
 class MovieSearchBar extends StatefulWidget {

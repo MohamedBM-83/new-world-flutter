@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:netflim/models/app_tab_controller.dart';
-import 'package:netflim/services/favourites_product.dart';
-import 'package:netflim/services/list_to_buy.dart';
-import 'package:netflim/services/netflim_theme.dart';
+import 'package:newworld/models/app_tab_controller.dart';
+import 'package:newworld/services/cart.dart';
+import 'package:newworld/services/list_to_buy.dart';
+import 'package:newworld/services/newworld_theme.dart';
 
 
 import 'services/api_service.dart';
@@ -16,7 +16,7 @@ import 'screens/login_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await UserPreferences().init();
-  await FavouritesProduct().init();
+  await Cart().init();
   await ListToBuy().init();
 
   runApp(const MainApp());
@@ -68,7 +68,8 @@ class _MainAppState extends State<MainApp> {
 
     switch (_loadingStatus) {
       case LoadingStatus.success:
-        screen = LoginScreen(products: _products!);
+        // screen = LoginScreen(products: _products!);
+        screen = AppTabController(ProductList: _products);
         break;
       default:
         screen = HomeScreen(
@@ -83,7 +84,7 @@ class _MainAppState extends State<MainApp> {
 
     return MaterialApp(
       home: screen,
-      theme: NetflimTheme.theme(),
+      theme: NetfilmTheme.theme(),
       debugShowCheckedModeBanner: false,
     );
   }

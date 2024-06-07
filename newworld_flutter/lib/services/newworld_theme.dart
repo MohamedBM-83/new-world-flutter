@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:netflim/services/user_preferences.dart';
+import 'package:newworld/services/user_preferences.dart';
 
-class NetflimTheme {
+class NetfilmTheme {
   // Instance unique privée de ListToWatch pour le modèle Singleton.
-  static final NetflimTheme _instance = NetflimTheme._internal();
+  static final NetfilmTheme _instance = NetfilmTheme._internal();
 
   // Factory constructor retournant l'instance unique.
-  factory NetflimTheme() {
+  factory NetfilmTheme() {
     return _instance;
   }
 
   // Constructeur privé pour l'initialisation de l'instance Singleton.
-  NetflimTheme._internal();
+  NetfilmTheme._internal();
 
     /// Thème spécifique pour la TabBar
   static ThemeData theme() {
