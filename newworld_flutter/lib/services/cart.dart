@@ -62,7 +62,7 @@ class Cart {
     return cart.contains(productId);
   }
 
-  /// Supprime un produits des favoris
+  /// Supprime un produits du panier
   Future<void> removeFromCart(Product product) async {
     List<String> cart = _prefs?.getStringList('Cart') ?? [];
     final productId = product.id.toString();
@@ -71,6 +71,10 @@ class Cart {
       cart.remove(productId);
       await _prefs?.setStringList('Cart', cart);
     }
+  }
+  //Vide le panier
+  Future<void> clearCart() async {
+    await _prefs?.remove('Cart');
   }
 
   //Calcul le prix total du panier

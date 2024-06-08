@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:newworld/services/api_service.dart';
 import 'package:newworld/services/cart.dart';
 import 'package:newworld/services/user_preferences.dart';
 
@@ -39,6 +40,8 @@ class CheckoutBar extends StatelessWidget {
                     EdgeInsets.symmetric(horizontal: 60, vertical: 10)),
               ),
               onPressed: () {
+                List<String> productIds = Cart().list();
+                ApiService().createOrder(productIds);
                 // Ajoutez ici la logique pour le paiement
               },
               child: Text('Payer'),

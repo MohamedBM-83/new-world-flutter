@@ -51,8 +51,6 @@ class _MainAppState extends State<MainApp> {
 
       _products = await service.getProducts(1);
 
-      //Movie? movie = await service.getMovie(940721);
-
       _loadingStatus = LoadingStatus.success;
     } catch (e) {
       print(e);
@@ -68,8 +66,8 @@ class _MainAppState extends State<MainApp> {
 
     switch (_loadingStatus) {
       case LoadingStatus.success:
-        // screen = LoginScreen(products: _products!);
-        screen = AppTabController(ProductList: _products);
+        screen = LoginScreen(products: _products!);
+        // screen = AppTabController(ProductList: _products);
         break;
       default:
         screen = HomeScreen(

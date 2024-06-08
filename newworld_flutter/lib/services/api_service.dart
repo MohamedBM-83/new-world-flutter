@@ -4,6 +4,7 @@ import '../models/product.dart';
 import 'package:newworld/models/user.dart';
 import 'api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:newworld/services/cart.dart';
 
 /// Classe `ApiService` gère les requêtes réseau pour récupérer des données de
 /// produits depuis une API externe.
@@ -66,21 +67,21 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', response.data['token']);
 
-      final response2 = await dio.get('http://localhost:8000/api/users?email=$email');
+      final response2 =
+          await dio.get('http://localhost:8000/api/users?email=$email');
       if (response2.statusCode == 200) {
         List<dynamic> results = response2.data["hydra:member"];
         int userId = results[0]['id'];
         await prefs.setInt('userId', userId);
       }
-        return true;
-      } else {
-        return false;
-      }
+      return true;
+    } else {
+      return false;
     }
+  }
 
   Future<List<Product>> getProducts(int pageNumber) async {
     Response response = await getData("/products", params: {
@@ -166,32 +167,54 @@ class ApiService {
       throw response;
     }
   }
-  Future<Response> createOrder(List<Map<String, dynamic>> cartItems) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  int? userId = prefs.getInt('userId');
 
-  // Construction du corps de la requête
-  Map<String, dynamic> body = {
-    'user': userId, // Assurez-vous que l'API attend le token ici, sinon vous devrez peut-être fournir l'ID de l'utilisateur
-    'status': 'pending', // Mettez le statut que vous voulez pour la nouvelle commande
-    'orderlines': cartItems.map((item) => {
-      'product_id': item['id'], // Assurez-vous que 'id' est le bon champ pour l'ID du produit
-      'quantity': item['quantity'], // Assurez-vous que 'quantity' est le bon champ pour la quantité
-    }).toList(),
-  };
-
-  // Envoi de la requête
-  final response = await dio.post(
-    '/orders',
-    data: body
+  Future<Response> createOrder(List<String> cartItems) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt('userId');
+    print(userId);
+    //On crée une nouvelle commande
+    final response = await dio.post(
+      'http://localhost:8000/api/orders',
+      options: Options(
+        headers: {
+          'Content-Type': 'application/ld+json',
+        },
+      ),
+      data: {
+        'user': '/api/users/$userId',
+        'state': 'pending',
+        'orderLines': [],
+      },
     );
 
-  // Vérification de la réponse
-  if (response.statusCode == 200) {
-    return response;
-  } else {
-    throw Exception('Failed to create order: ${response.statusMessage}');
+    if (response.statusCode == 201) {
+      //On récupère l'ID de la commande
+      int orderId = response.data['id'];
+      print(orderId);
+      //On ajoute les produits à la commande
+      for (String productId in cartItems) {
+        final responseorderline =
+            await dio.post("http://localhost:8000/api/order_lines",
+                options: Options(
+                  headers: {
+                    'Content-Type': 'application/ld+json',
+                  },
+                ),
+                data: {
+              'orderLink': '/api/orders/$orderId',
+              'product': '/api/products/$productId',
+              'quantity': 1,
+            });
+        if (responseorderline.statusCode != 201) {
+          throw Exception(
+              'Failed to create orderline: ${responseorderline.statusMessage}');
+        }
+      }
+      //On vide le panier
+      Cart().clearCart();
+      return response;
+    } else {
+      throw Exception('Failed to create order: ${response.statusMessage}');
+    }
   }
-}
-  
 }

@@ -66,7 +66,7 @@ class _AppTabControllerState extends State<AppTabController>
             tabs: const [
               Tab(icon: Icon(Icons.home), text: 'Accueil'),
               Tab(icon: Icon(Icons.shopping_bag), text: 'Panier'),
-              Tab(icon: Icon(Icons.person), text: 'Mon Compte'),
+              Tab(icon: Icon(Icons.list), text: 'Wishlist'),
             ],
             labelStyle: const TextStyle(fontSize: 12),
             unselectedLabelStyle: const TextStyle(fontSize: 10),
@@ -112,7 +112,7 @@ class _AppTabControllerState extends State<AppTabController>
                   return Center(child: Text('Erreur: ${snapshot.error}'));
                 } else {
                   return ProductListScreen(
-                      title: "Votre Compte", products: snapshot.data ?? []);
+                      title: "Votre liste d'envie", products: snapshot.data ?? []);
                 }
               },
             ),
